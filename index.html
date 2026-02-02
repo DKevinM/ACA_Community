@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+
+  <meta charset="utf-8" />
+  <title>AQHI Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <style>
+    #map {
+      height: 100vh;      /* fallback */
+      height: 100dvh;     /* correct mobile behavior */
+    }
+    .legend {
+      background: white;
+      padding: 10px;
+      line-height: 1.5;
+    }
+    .legend i {
+      width: 18px;
+      height: 18px;
+      float: left;
+      margin-right: 8px;
+      opacity: 0.7;
+    }
+    .logo-container {
+      background: white;
+      padding: 6px;
+      border-radius: 8px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .logo-container img {
+      display: block;
+      max-width: 100px;
+      height: auto;
+    }
+
+    .panel-close {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    #showPanelsBtn {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      z-index: 3000;
+      padding: 6px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+
+    
+
+    .calgary-panel {
+      position: absolute;
+      top: 2vh;
+      left: 2vw;
+      width: min(420px, 92vw);
+      max-height: 70vh;
+      overflow-y: auto;
+    
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #999;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      font-family: Arial;
+      z-index: 9999;
+    }
+
+    
+    /* Header always visible */
+    .panel-header {
+      font-weight: bold;
+      cursor: pointer;
+      padding: 6px;
+      background: #f2f2f2;
+      border-radius: 6px;
+      text-align: center;
+    }
+    
+    /* Collapsed = only header height */
+    #calgary-panel.collapsed {
+      max-height: 38px;
+    }
+    
+    /* Expanded = full content allowed */
+    #calgary-panel.expanded {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+      
+    
+    .loc-line {
+      font-size: 0.85em;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    
+    .subtitle {
+      font-size: 0.9em;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    
+    .aqhi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    
+    .aqhi-cell {
+      text-align: center;
+    }
+    
+    .aqhi-label {
+      font-size: 0.75em;
+      margin-bottom: 4px;
+    }
+
+    
+    .aqhi-box {
+      width: 60px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: black;
+      border-radius: 6px;
+      margin: auto;
+    }
+    
+    .forecast-title {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+
+
+    
+    .info-box {
+      position: absolute;
+      top: 2vh;
+      left: 2vw;
+      width: min(340px, 92vw);     /* shrink with screen */
+      max-height: 70vh;            /* shrink with screen */
+      overflow-y: auto;
+    
+      background: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      font-size: 13px;
+      z-index: 1000;
+    }
+
+    .weather-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    
+    .weather-table th,
+    .weather-table td {
+      padding: 4px 6px;
+      text-align: center;
+      font-size: 12px;
+      border-bottom: 1px solid #ddd;
+      white-space: nowrap;
+    }
+    
+    .weather-table th {
+      background: #f2f2f2;
+      font-weight: 600;
+    }
+    
+
+    /* ================= POPUP WEATHER TABLE ================= */
+    
+    .popup-weather {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 12px;
+    }
+    
+    .popup-weather th,
+    .popup-weather td {
+      text-align: center;
+      padding: 4px 6px;
+      white-space: nowrap;
+    }
+    
+    .popup-weather th {
+      font-weight: 700;
+      border-bottom: 1px solid #bbb;
+    }
+    
+    /* Force identical column widths */
+    .popup-weather th:nth-child(1),
+    .popup-weather td:nth-child(1) { width: 60px; }  /* Time */
+    
+    .popup-weather th:nth-child(2),
+    .popup-weather td:nth-child(2) { width: 60px; }  /* Temp */
+    
+    .popup-weather th:nth-child(3),
+    .popup-weather td:nth-child(3) { width: 70px; }  /* Wind */
+    
+    .popup-weather th:nth-child(4),
+    .popup-weather td:nth-child(4) { width: 50px; }  /* Dir */
+    
+    .popup-weather th:nth-child(5),
+    .popup-weather td:nth-child(5) { width: 60px; }  /* Precip */
+    
+    .popup-weather th:nth-child(6),
+    .popup-weather td:nth-child(6) { width: 40px; }  /* UV */
+
+
+
+
+    /* ========== TIGHT MOBILE CARD ========== */
+    @media screen and (max-width: 768px) {
+    
+      .calgary-panel {
+        left: 6px !important;
+        right: 6px !important;
+        width: auto !important;
+        max-height: 75vh;
+        font-size: 12px;
+      }
+    
+      .aqhi-box {
+        width: 36px;
+        height: 24px;
+        font-size: 11px;
+      }
+    
+      .weather-table th,
+      .weather-table td {
+        font-size: 10px;
+        padding: 3px;
+      }
+    }
+
+
+
+
+
+
+    
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<div id="calgary-panel" class="calgary-panel collapsed">
+  <div class="panel-header" onclick="toggleCalgaryPanel()">
+    AQHI & Forecast (tap to expand)
+  </div>
+
+  <div id="calgary-content"></div>
+</div>
+
+  
+
+  
+<button id="showPanelsBtn" onclick="showPanels()">Show Panels</button>
+  
+
+  
+  
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+  
+<script src="data.js"></script> 
+
+<script src="js/purpleair.js"></script>   
+
+<script src="js/main.js"></script>  
+
+<script src="js/click_utils.js"></script>
+
+<script src="js/calgary_aqhi.js"></script>    
+
+<script src="js/weather.js"></script> 
+
+<script src="js/click_engine.js"></script> 
+  
+<script>
+window.dataReady.then(() => {
+  fetchAllStationData().then(allStations => {
+    allStations.forEach(({ stationName, lat, lon, html, aqhi }) => {
+      const fillColor = getColor(String(aqhi || "NA"));
+      const marker = L.circleMarker([lat, lon], {
+        radius: 7,
+        fillColor,
+        color: "#222",
+        weight: 1,
+        fillOpacity: 0.85
+      }).bindPopup(html);
+
+      marker.addTo(markerGroup);
+    });
+    markerGroup.addTo(map);
+  });
+});
+</script>
+
+
+    
+
+<script>
+window.addEventListener("DOMContentLoaded", async () => {
+
+  if (!window.refreshCalgaryPanel) {
+    console.error("refreshCalgaryPanel missing — check script order");
+    return;
+  }
+
+  // 1️⃣ Build AQHI panel
+  await window.refreshCalgaryPanel();
+
+  // 2️⃣ Inject Calgary current weather into the panel
+  if (window.showWeatherForPoint) {
+  }
+
+});
+</script>
+
+
+
+  
+<script>
+function showPanels() {
+  const panel = document.getElementById('calgary-panel');
+  panel.classList.remove('collapsed');
+  panel.classList.add('expanded');
+}
+</script>
+
+<script>
+function toggleCalgaryPanel() {
+  const panel = document.getElementById('calgary-panel');
+  panel.classList.toggle('collapsed');
+  panel.classList.toggle('expanded');
+}
+</script>
+
+  
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/AQ_Block_Heater/sw.js');
+}
+</script>
+
+  
+</body>
+</html>
