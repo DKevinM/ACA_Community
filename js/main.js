@@ -26,8 +26,8 @@ map.on("click", async function (e) {
   await renderClickData(lat, lng, map);
 });
 
-  if (window.refreshCalgaryPanel) {
-    window.refreshCalgaryPanel();
+  if (window.refreshcommunityPanel) {
+    window.refreshcommunityPanel();
   }
 
 
@@ -346,7 +346,7 @@ async function renderClickData(lat, lng, map) {
       showWeather(wdata);
     }
 
-    // ---- CALGARY MINI PANEL ----
+    // ---- community MINI PANEL ----
     if (window.updateMiniWeather) {
       window.updateMiniWeather(wdata);
     }
