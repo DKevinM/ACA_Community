@@ -331,7 +331,6 @@ window.updatePanelLocation = function(address, lat, lng) {
 
 
 
-
 // ================= BOOTSTRAP =================
 loadcommunityFromAB()
   .then(drawcommunityPanel)
@@ -340,4 +339,9 @@ loadcommunityFromAB()
 window.refreshcommunityPanel = async function () {
   await loadcommunityFromAB();
   drawcommunityPanel();  
+};
+
+window.updateCommunityAQHIFromClick = async function(lat, lng) {
+  await loadcommunityFromAB(lat, lng);
+  drawcommunityPanel();
 };
