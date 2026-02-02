@@ -6,7 +6,7 @@ const openStreetMapLayer = L.tileLayer(
 // ---------- SINGLE MAP ----------
 const map = L.map('map', {
   layers: [openStreetMapLayer]
-}).setView([51.045150, -114.045313], 13);
+}).setView([53.45, -114.10], 8);
 
 let hasClickedBefore = false;
 window.lastClickedLatLng = null;
