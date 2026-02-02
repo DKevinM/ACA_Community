@@ -171,7 +171,7 @@ function drawcommunityPanel() {
   const html = `
 
   <div style="font-size:16px; font-weight:700;">
-    community Air Quality (AQHI)
+    ${C.current.station} Air Quality (AQHI)
   </div>
 
   <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:6px; margin-top:10px;">
