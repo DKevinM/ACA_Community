@@ -60,7 +60,7 @@
 
     
 
-    .calgary-panel {
+    .community-panel {
       position: absolute;
       top: 2vh;
       left: 2vw;
@@ -89,12 +89,12 @@
     }
     
     /* Collapsed = only header height */
-    #calgary-panel.collapsed {
+    #community-panel.collapsed {
       max-height: 38px;
     }
     
     /* Expanded = full content allowed */
-    #calgary-panel.expanded {
+    #community-panel.expanded {
       max-height: 70vh;
       overflow-y: auto;
     }
@@ -233,7 +233,7 @@
     /* ========== TIGHT MOBILE CARD ========== */
     @media screen and (max-width: 768px) {
     
-      .calgary-panel {
+      .community-panel {
         left: 6px !important;
         right: 6px !important;
         width: auto !important;
@@ -265,12 +265,12 @@
 <body>
 <div id="map"></div>
 
-<div id="calgary-panel" class="calgary-panel collapsed">
-  <div class="panel-header" onclick="toggleCalgaryPanel()">
+<div id="community-panel" class="community-panel collapsed">
+  <div class="panel-header" onclick="togglecommunityPanel()">
     AQHI & Forecast (tap to expand)
   </div>
 
-  <div id="calgary-content"></div>
+  <div id="community-content"></div>
 </div>
 
   
@@ -292,7 +292,7 @@
 
 <script src="js/click_utils.js"></script>
 
-<script src="js/calgary_aqhi.js"></script>    
+<script src="js/community_aqhi.js"></script>    
 
 <script src="js/weather.js"></script> 
 
@@ -324,15 +324,15 @@ window.dataReady.then(() => {
 <script>
 window.addEventListener("DOMContentLoaded", async () => {
 
-  if (!window.refreshCalgaryPanel) {
-    console.error("refreshCalgaryPanel missing — check script order");
+  if (!window.refreshcommunityPanel) {
+    console.error("refreshcommunityPanel missing — check script order");
     return;
   }
 
   // 1️⃣ Build AQHI panel
-  await window.refreshCalgaryPanel();
+  await window.refreshcommunityPanel();
 
-  // 2️⃣ Inject Calgary current weather into the panel
+  // 2️⃣ Inject community current weather into the panel
   if (window.showWeatherForPoint) {
   }
 
@@ -344,15 +344,15 @@ window.addEventListener("DOMContentLoaded", async () => {
   
 <script>
 function showPanels() {
-  const panel = document.getElementById('calgary-panel');
+  const panel = document.getElementById('community-panel');
   panel.classList.remove('collapsed');
   panel.classList.add('expanded');
 }
 </script>
 
 <script>
-function toggleCalgaryPanel() {
-  const panel = document.getElementById('calgary-panel');
+function togglecommunityPanel() {
+  const panel = document.getElementById('community-panel');
   panel.classList.toggle('collapsed');
   panel.classList.toggle('expanded');
 }
