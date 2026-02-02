@@ -106,7 +106,7 @@ async function loadcommunityAQHI() {
 
 
 
-async function loadcommunityFromAB() {
+async function loadcommunityFromAB(clickLat, clickLng) {
 
   const url =
   "https://data.environment.alberta.ca/EdwServices/aqhi/odata/CommunityAqhis?$format=json";
@@ -114,30 +114,43 @@ async function loadcommunityFromAB() {
   const r = await fetch(url);
   const data = await r.json();
 
-  const cal = data.value.find(c =>
-    c.CommunityName.toLowerCase() === "community"
-  );
+  let closest = null;
+  let minDist = Infinity;
 
-  if (!cal) {
-    console.error("No community found in AB AQHI feed");
+  data.value.forEach(c => {
+    const d = getDistance(clickLat, clickLng, c.Latitude, c.Longitude); // meters
+    if (d < minDist) {
+      minDist = d;
+      closest = c;
+    }
+  });
+
+  if (!closest) {
+    console.error("No community AQHI found");
     return;
   }
 
   window.communityAQHI = {
     current: {
-      station: "community",
-      value: Number(cal.Aqhi),
-      time: cal.ReadingDate
+      station: closest.CommunityName,
+      value: Number(closest.Aqhi),
+      time: closest.ReadingDate
     },
     forecast: {
-      today: Number(cal.ForecastToday),
-      tonight: Number(cal.ForecastTonight),
-      tomorrow: Number(cal.ForecastTomorrow)
+      today: Number(closest.ForecastToday),
+      tonight: Number(closest.ForecastTonight),
+      tomorrow: Number(closest.ForecastTomorrow)
     }
   };
 
-  console.log("community AQHI from Alberta:", window.communityAQHI);
+  console.log(
+    "Closest community:",
+    closest.CommunityName,
+    "Distance:",
+    (minDist/1000).toFixed(2), "km"
+  );
 }
+
 
 
 
