@@ -28,6 +28,16 @@ function buildPopupWeatherTable(data) {
         Weather (next 6 hours)
       </div>
       <table style="width:100%; font-size:11px; border-collapse:collapse;">
+      <table style="width:100%; font-size:11px; border-collapse:collapse;">
+        <thead>
+          <tr style="border-bottom:1px solid #ccc;">
+            <th align="left">Time</th>
+            <th align="left">Temp</th>
+            <th align="left">Wind</th>
+            <th align="left">Precip</th>
+            <th align="left">UV</th>
+          </tr>
+        </thead>
         <tbody>
           ${rows}
         </tbody>
@@ -47,11 +57,12 @@ async function renderClickData(lat, lng, map) {
 
   
 function getPurpleAirList() {
-  if (Array.isArray(window.AppData?.purpleair)) {
-    return window.AppData.purpleair;
+  if (Array.isArray(window.purpleAirSensors) && window.purpleAirSensors.length) {
+    return window.purpleAirSensors;
   }
   return [];
 }
+
 
 
 
@@ -100,24 +111,19 @@ function getPurpleAirList() {
       `wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
       `&timezone=America%2FEdmonton`
     );
-  
+
     weatherData = await r.json();
     weatherHtml = buildPopupWeatherTable(weatherData);
-  
-    currentWeather = window.extractCurrentWeather(weatherData);
-
-  
-    // 2️⃣ Update AQHI panel weather
-    if (window.renderPanelWeather) {
-      window.renderPanelWeather(
-        currentWeather,
-        lat,
-        lng,
-        window.lastClickedAddress // if you already store this
-      );
+    
+    // THIS is what your panel expects
+    if (window.extractCurrentWeather) {
+      currentWeather = window.extractCurrentWeather(weatherData);
     }
-  
-
+    
+    if (window.renderPanelWeather && currentWeather) {
+      window.renderPanelWeather(currentWeather, lat, lng, window.lastClickedAddres);
+    }
+    
   
   } catch (e) {
     console.warn("Weather fetch failed", e);
@@ -177,43 +183,7 @@ function getPurpleAirList() {
 
 
 
-  // ---- 3b) UPDATE TOP-LEFT AQHI PANEL WITH CURRENT WEATHER ----
-  try {
-    const now = new Date();
-    let i = 0;
-  
-    while (i < weatherData.hourly.time.length) {
-      if (new Date(weatherData.hourly.time[i]) >= now) break;
-      i++;
-    }
-  
-    const currentWeather = {
-      temp: Math.round(weatherData.hourly.temperature_2m[i]),
-      rh: weatherData.hourly.relative_humidity_2m
-        ? Math.round(weatherData.hourly.relative_humidity_2m[i])
-        : null,
-      precip: weatherData.hourly.precipitation[i].toFixed(1),
-      cloud: weatherData.hourly.cloudcover
-        ? Math.round(weatherData.hourly.cloudcover[i])
-        : null,
-      uv: weatherData.hourly.uv_index
-        ? weatherData.hourly.uv_index[i].toFixed(1)
-        : null,
-      wind: Math.round(weatherData.hourly.wind_speed_10m[i]),
-      gust: weatherData.hourly.wind_gusts_10m
-        ? Math.round(weatherData.hourly.wind_gusts_10m[i])
-        : null,
-      dir: weatherData.hourly.wind_direction_10m[i]
-    };
-  
-    if (typeof window.renderPanelWeather === "function") {
-      window.renderPanelWeather(currentWeather, lat, lng);
-    }
-  
-  } catch (e) {
-    console.warn("Panel weather update failed", e);
-  }
-  
+ 
   
 
   // ---- 5) CLICK POPUP TABLE ----
