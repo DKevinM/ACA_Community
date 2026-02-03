@@ -1,3 +1,6 @@
+let acaLayer, wcasLayer;
+
+
 // ---------- BASE LAYER FIRST ----------
 const openStreetMapLayer = L.tileLayer(
   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -10,6 +13,36 @@ const map = L.map('map', {
 
 let hasClickedBefore = false;
 window.lastClickedLatLng = null;
+
+Promise.all([
+  fetch("ACA.geojson").then(r => r.json()),
+  fetch("WCAS.geojson").then(r => r.json())
+]).then(([acaData, wcasData]) => {
+
+  acaLayer = L.geoJSON(acaData, {
+    style: {
+      color: "#1f78b4",
+      weight: 2,
+      fillOpacity: 0.03
+    }
+  });
+
+  wcasLayer = L.geoJSON(wcasData, {
+    style: {
+      color: "#33a02c",
+      weight: 2,
+      fillOpacity: 0.03
+    }
+  });
+
+  const overlays = {
+    "ACA Boundary": acaLayer,
+    "WCAS Boundary": wcasLayer
+  };
+
+  L.control.layers(null, overlays, { collapsed: false }).addTo(map);
+});
+
 
 // ---------------- MAP CLICK (THIS WAS MISSING) ----------------
 map.on("click", async function (e) {
