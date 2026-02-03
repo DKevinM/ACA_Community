@@ -28,7 +28,6 @@ function buildPopupWeatherTable(data) {
         Weather (next 6 hours)
       </div>
       <table style="width:100%; font-size:11px; border-collapse:collapse;">
-      <table style="width:100%; font-size:11px; border-collapse:collapse;">
         <thead>
           <tr style="border-bottom:1px solid #ccc;">
             <th align="left">Time</th>
@@ -101,27 +100,9 @@ function getPurpleAirList() {
     stationMarkers.push(circle);
   });
 
-// ---- 3) WEATHER (panel + popup use same fetch) ----
-try {
-  const r = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-    `&hourly=temperature_2m,relative_humidity_2m,precipitation,cloudcover,` +
-    `wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
-    `&timezone=America%2FEdmonton`
-  );
 
-  weatherData = await r.json();
-  weatherHtml = buildPopupWeatherTable(weatherData);
 
-  // ONLY THIS — NOTHING ELSE
-  if (window.extractCurrentWeather && window.renderPanelWeather) {
-    const currentWeather = window.extractCurrentWeather(weatherData);
-    window.renderPanelWeather(currentWeather, lat, lng);
-  }
 
-} catch (e) {
-  console.warn("Weather fetch failed", e);
-}
 
 
   // ---- 3c) REVERSE GEOCODE CLICK LOCATION ----
@@ -145,6 +126,32 @@ try {
   if (typeof window.updatePanelLocation === "function") {
     window.updatePanelLocation(addressText, lat, lng);
   }
+  
+  
+// ---- 3) WEATHER (panel + popup use same fetch) ----
+try {
+  const r = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+    `&hourly=temperature_2m,relative_humidity_2m,precipitation,cloudcover,` +
+    `wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
+    `&timezone=America%2FEdmonton`
+  );
+
+  weatherData = await r.json();
+  weatherHtml = buildPopupWeatherTable(weatherData);
+
+  // ONLY THIS — NOTHING ELSE
+  if (window.extractCurrentWeather && window.renderPanelWeather) {
+    const currentWeather = window.extractCurrentWeather(weatherData);
+    window.renderPanelWeather(currentWeather, lat, lng);
+  }
+
+} catch (e) {
+  console.warn("Weather fetch failed", e);
+}
+
+
+
 
   
 
@@ -233,15 +240,6 @@ try {
     </div>
   `;
 
-  // ---- UPDATE AQHI PANEL WITH CURRENT WEATHER (correct timing) ----
-  try {
-    if (weatherData && window.extractCurrentWeather && window.renderPanelWeather) {
-      const currentWeather = window.extractCurrentWeather(weatherData);
-      window.renderPanelWeather(currentWeather, lat, lng);
-    }
-  } catch (e) {
-    console.warn("Panel weather update failed", e);
-  }
 
 
   marker.bindPopup(popupHtml, {
