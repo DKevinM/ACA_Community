@@ -83,8 +83,7 @@ let stationMarkers = [];
 
 
 
-
-window.updateMiniWeather = function(w) {
+window.updateForecastTable = function(w) {
 
   const el = document.getElementById("mini-weather");
   if (!el) return;
