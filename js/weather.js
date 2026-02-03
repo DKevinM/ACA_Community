@@ -116,7 +116,7 @@ function updateMiniWeather(data) {
   const el = document.getElementById("mini-weather");
   if (el) el.innerHTML = html;
 
-  window.updateMiniWeather = updateMiniWeather;
+
 }
 
 
