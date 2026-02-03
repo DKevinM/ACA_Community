@@ -141,10 +141,29 @@ try {
   weatherHtml = buildPopupWeatherTable(weatherData);
 
   // ONLY THIS — NOTHING ELSE
-  if (window.extractCurrentWeather && window.renderPanelWeather) {
-    const currentWeather = window.extractCurrentWeather(weatherData);
+  if (window.renderPanelWeather && weatherData) {
+    const now = new Date();
+    let i = 0;
+  
+    while (i < weatherData.hourly.time.length) {
+      if (new Date(weatherData.hourly.time[i]) >= now) break;
+      i++;
+    }
+  
+    const currentWeather = {
+      temp: Math.round(weatherData.hourly.temperature_2m[i]),
+      rh: Math.round(weatherData.hourly.relative_humidity_2m[i]),
+      precip: weatherData.hourly.precipitation[i].toFixed(1),
+      cloud: Math.round(weatherData.hourly.cloudcover[i]),
+      uv: weatherData.hourly.uv_index[i].toFixed(1),
+      wind: Math.round(weatherData.hourly.wind_speed_10m[i]),
+      gust: Math.round(weatherData.hourly.wind_gusts_10m[i]),
+      dir: weatherData.hourly.wind_direction_10m[i]
+    };
+  
     window.renderPanelWeather(currentWeather, lat, lng);
   }
+
 
 } catch (e) {
   console.warn("Weather fetch failed", e);
