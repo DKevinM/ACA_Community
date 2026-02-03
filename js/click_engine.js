@@ -233,6 +233,15 @@ try {
     </div>
   `;
 
+  // ---- UPDATE AQHI PANEL WITH CURRENT WEATHER (correct timing) ----
+  try {
+    if (weatherData && window.extractCurrentWeather && window.renderPanelWeather) {
+      const currentWeather = window.extractCurrentWeather(weatherData);
+      window.renderPanelWeather(currentWeather, lat, lng);
+    }
+  } catch (e) {
+    console.warn("Panel weather update failed", e);
+  }
 
 
   marker.bindPopup(popupHtml, {
