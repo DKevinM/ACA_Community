@@ -113,7 +113,8 @@ function updateMiniWeather(data) {
     </table>
   `;
 
-  const el = document.getElementById("mini-weather");
+
+  const el = document.getElementById("mini-weather-forecast");
   if (el) el.innerHTML = html;
 
 
