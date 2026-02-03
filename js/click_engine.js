@@ -210,19 +210,9 @@ async function renderClickData(lat, lng, map) {
 
 
   
-  let weatherHtml = "<div style='margin-top:6px;'>Weather unavailable</div>";
-  
-  try {
-    const r = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-      `&hourly=temperature_2m,precipitation,wind_speed_10m,wind_direction_10m,uv_index` +
-      `&timezone=America%2FEdmonton`
-    );
-    const data = await r.json();
-    weatherHtml = buildPopupWeatherTable(data);
-  } catch(e) {
-    console.warn("Popup weather failed", e);
-  }
+  // reuse the SAME data from earlier fetch
+  weatherHtml = buildPopupWeatherTable(data);
+
 
 
 
