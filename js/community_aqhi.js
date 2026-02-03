@@ -105,50 +105,66 @@ async function loadcommunityAQHI() {
 
 
 
+async function findClosestCommunityName(lat, lng) {
 
-async function loadcommunityFromAB(clickLat, clickLng) {
+  const obs = await fetch(
+    "https://raw.githubusercontent.com/DKevinM/CAN_AQHI/main/data/aqhi_observations.geojson"
+  ).then(r => r.json());
 
-  const url =
-  "https://data.environment.alberta.ca/EdwServices/aqhi/odata/CommunityAqhis?$format=json";
-
-  const r = await fetch(url);
-  const data = await r.json();
-
-  let closest = null;
+  let closestName = null;
   let minDist = Infinity;
 
-  data.value.forEach(c => {
-    const d = getDistance(clickLat, clickLng, c.Lat, c.Lon);  // meters
+  obs.features.forEach(f => {
+    const [lon, lat2] = f.geometry.coordinates;
+    const d = getDistance(lat, lng, lat2, lon);
+
     if (d < minDist) {
       minDist = d;
-      closest = c;
+      closestName = f.properties.name;
     }
   });
 
-  if (!closest) {
-    console.error("No community AQHI found");
-    return;
+  console.log("Closest ECCC community:", closestName);
+  return closestName;
+}
+
+
+
+
+
+async function loadcommunityFromAB(clickLat, clickLng) {
+
+    const name = await findClosestCommunityName(clickLat, clickLng);
+  
+    const url =
+    "https://data.environment.alberta.ca/EdwServices/aqhi/odata/CommunityAqhis?$format=json";
+  
+    const r = await fetch(url);
+    const data = await r.json();
+  
+    const match = data.value.find(c =>
+      c.CommunityName.toLowerCase() === name.toLowerCase()
+    );
+  
+    if (!match) {
+      console.error("No Alberta match for:", name);
+      return;
+    }
+  
+    window.communityAQHI = {
+      current: {
+        station: match.CommunityName,
+        value: Number(match.Aqhi),
+        time: match.ReadingDate
+      },
+      forecast: {
+        today: Number(match.ForecastToday),
+        tonight: Number(match.ForecastTonight),
+        tomorrow: Number(match.ForecastTomorrow)
+      }
+    };
   }
 
-  window.communityAQHI = {
-    current: {
-      station: closest.CommunityName,
-      value: Number(closest.Aqhi),
-      time: closest.ReadingDate
-    },
-    forecast: {
-      today: Number(closest.ForecastToday),
-      tonight: Number(closest.ForecastTonight),
-      tomorrow: Number(closest.ForecastTomorrow)
-    }
-  };
-
-  console.log(
-    "Closest community:",
-    closest.CommunityName,
-    "Distance:",
-    (minDist/1000).toFixed(2), "km"
-  );
 }
 
 
