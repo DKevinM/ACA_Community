@@ -101,33 +101,27 @@ function getPurpleAirList() {
     stationMarkers.push(circle);
   });
 
-  // ---- 3) WEATHER (panel + popup use same fetch) ----
-  let currentWeather = null;
-  
-  try {
-    const r = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
-      `&hourly=temperature_2m,relative_humidity_2m,precipitation,cloudcover,` +
-      `wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
-      `&timezone=America%2FEdmonton`
-    );
+// ---- 3) WEATHER (panel + popup use same fetch) ----
+try {
+  const r = await fetch(
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}` +
+    `&hourly=temperature_2m,relative_humidity_2m,precipitation,cloudcover,` +
+    `wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
+    `&timezone=America%2FEdmonton`
+  );
 
-    weatherData = await r.json();
-    weatherHtml = buildPopupWeatherTable(weatherData);
-    
-    // THIS is what your panel expects
-    if (window.extractCurrentWeather) {
-      currentWeather = window.extractCurrentWeather(weatherData);
-    }
-    
-    if (window.renderPanelWeather && currentWeather) {
-      window.renderPanelWeather(currentWeather, lat, lng, window.lastClickedAddres);
-    }
-    
-  
-  } catch (e) {
-    console.warn("Weather fetch failed", e);
+  weatherData = await r.json();
+  weatherHtml = buildPopupWeatherTable(weatherData);
+
+  // ONLY THIS — NOTHING ELSE
+  if (window.extractCurrentWeather && window.renderPanelWeather) {
+    const currentWeather = window.extractCurrentWeather(weatherData);
+    window.renderPanelWeather(currentWeather, lat, lng);
   }
+
+} catch (e) {
+  console.warn("Weather fetch failed", e);
+}
 
 
   // ---- 3c) REVERSE GEOCODE CLICK LOCATION ----
