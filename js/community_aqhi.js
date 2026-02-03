@@ -165,11 +165,6 @@ async function loadcommunityFromAB(clickLat, clickLng) {
     };
   }
 
-}
-
-
-
-
 
 
 // ================= DRAW PANEL =================
@@ -348,13 +343,14 @@ window.updatePanelLocation = function(address, lat, lng) {
 
 
 // ================= BOOTSTRAP =================
-loadcommunityFromAB()
+loadcommunityFromAB(clickLat, clickLng)
   .then(drawcommunityPanel)
   .catch(err => console.error("community AQHI failed:", err));
 
+// do NOT auto-run on load
 window.refreshcommunityPanel = async function () {
-  await loadcommunityFromAB();
-  drawcommunityPanel();  
+  // just draw whatever is already in memory
+  drawcommunityPanel();
 };
 
 window.updateCommunityAQHIFromClick = async function(lat, lng) {
