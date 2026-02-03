@@ -2,22 +2,22 @@ function buildPopupWeatherTable(data) {
   const now = new Date();
   let i = 0;
 
-  while (i < data.hourly.time.length) {
-    if (new Date(data.hourly.time[i]) >= now) break;
+  while (i < weatherData.hourly.time.length) {
+    if (new Date(weatherData.hourly.time[i]) >= now) break;
     i++;
   }
 
   let rows = "";
   for (let j = 0; j < 6; j++) {
-    const t = new Date(data.hourly.time[i + j]);
+    const t = new Date(weatherData.hourly.time[i + j]);
     rows += `
       <tr>
         <td>${t.toLocaleTimeString("en-CA",{hour:"2-digit",minute:"2-digit"})}</td>
-        <td>${Math.round(data.hourly.temperature_2m[i+j])}°C</td>
-        <td>${Math.round(data.hourly.wind_speed_10m[i+j])} km/h 
-            ${degToCardinal(data.hourly.wind_direction_10m[i+j])}</td>
-        <td>${data.hourly.precipitation[i+j].toFixed(1)} mm</td>
-        <td>${Math.round(data.hourly.uv_index[i+j])}</td>
+        <td>${Math.round(weatherData.hourly.temperature_2m[i+j])}°C</td>
+        <td>${Math.round(weatherData.hourly.wind_speed_10m[i+j])} km/h 
+            ${degToCardinal(weatherData.hourly.wind_direction_10m[i+j])}</td>
+        <td>${weatherData.hourly.precipitation[i+j].toFixed(1)} mm</td>
+        <td>${Math.round(weatherData.hourly.uv_index[i+j])}</td>
       </tr>
     `;
   }
@@ -62,6 +62,9 @@ async function renderClickData(lat, lng, map) {
 
   
   function getPurpleAirList() {
+
+    let weatherData = null;
+    let weatherHtml = "";
   
     // Primary: raw sensor objects (authoritative)
     if (Array.isArray(window.purpleAirSensors) && window.purpleAirSensors.length) {
@@ -133,7 +136,7 @@ async function renderClickData(lat, lng, map) {
       `&timezone=America%2FEdmonton`
     );
   
-    const data = await r.json();
+    weatherData = await r.json();
   
     // 1️⃣ Extract current conditions
     if (window.extractCurrentWeather) {
@@ -151,7 +154,8 @@ async function renderClickData(lat, lng, map) {
     }
   
     // 3️⃣ Popup forecast (UNCHANGED)
-    weatherHtml = buildPopupWeatherTable(data);
+    weatherHtml = buildPopupWeatherTable(weatherData);
+
   
   } catch (e) {
     console.warn("Weather fetch failed", e);
@@ -209,11 +213,6 @@ async function renderClickData(lat, lng, map) {
   
 
 
-  
-  // reuse the SAME data from earlier fetch
-  weatherHtml = buildPopupWeatherTable(data);
-
-
 
 
   // ---- 3b) UPDATE TOP-LEFT AQHI PANEL WITH CURRENT WEATHER ----
@@ -221,28 +220,28 @@ async function renderClickData(lat, lng, map) {
     const now = new Date();
     let i = 0;
   
-    while (i < data.hourly.time.length) {
-      if (new Date(data.hourly.time[i]) >= now) break;
+    while (i < weatherData.hourly.time.length) {
+      if (new Date(weatherData.hourly.time[i]) >= now) break;
       i++;
     }
   
     const currentWeather = {
-      temp: Math.round(data.hourly.temperature_2m[i]),
-      rh: data.hourly.relative_humidity_2m
-        ? Math.round(data.hourly.relative_humidity_2m[i])
+      temp: Math.round(weatherData.hourly.temperature_2m[i]),
+      rh: weatherData.hourly.relative_humidity_2m
+        ? Math.round(weatherData.hourly.relative_humidity_2m[i])
         : null,
-      precip: data.hourly.precipitation[i].toFixed(1),
-      cloud: data.hourly.cloudcover
-        ? Math.round(data.hourly.cloudcover[i])
+      precip: weatherData.hourly.precipitation[i].toFixed(1),
+      cloud: weatherData.hourly.cloudcover
+        ? Math.round(weatherData.hourly.cloudcover[i])
         : null,
-      uv: data.hourly.uv_index
-        ? data.hourly.uv_index[i].toFixed(1)
+      uv: weatherData.hourly.uv_index
+        ? weatherData.hourly.uv_index[i].toFixed(1)
         : null,
-      wind: Math.round(data.hourly.wind_speed_10m[i]),
-      gust: data.hourly.wind_gusts_10m
-        ? Math.round(data.hourly.wind_gusts_10m[i])
+      wind: Math.round(weatherData.hourly.wind_speed_10m[i]),
+      gust: weatherData.hourly.wind_gusts_10m
+        ? Math.round(weatherData.hourly.wind_gusts_10m[i])
         : null,
-      dir: data.hourly.wind_direction_10m[i]
+      dir: weatherData.hourly.wind_direction_10m[i]
     };
   
     if (typeof window.renderPanelWeather === "function") {
