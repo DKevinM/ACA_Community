@@ -85,7 +85,7 @@ let stationMarkers = [];
 
 window.updateForecastTable = function(w) {
 
-  const el = document.getElementById("mini-weather");
+  const el = document.getElementById("forecast-table");
   if (!el) return;
 
   // ----- CURRENT CONDITIONS -----
