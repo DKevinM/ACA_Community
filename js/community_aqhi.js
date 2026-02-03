@@ -118,7 +118,7 @@ async function loadcommunityFromAB(clickLat, clickLng) {
   let minDist = Infinity;
 
   data.value.forEach(c => {
-    const d = getDistance(clickLat, clickLng, c.Latitude, c.Longitude); // meters
+    const d = getDistance(clickLat, clickLng, c.Lat, c.Lon);  // meters
     if (d < minDist) {
       minDist = d;
       closest = c;
