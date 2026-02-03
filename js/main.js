@@ -301,21 +301,6 @@ function style(feature) {
 
 
 
-// =========================================================
-// THIS BELONGS IN: main.js  (AT THE VERY BOTTOM)
-// =========================================================
-
-async function renderClickData(lat, lng, map) {
-
-  // ----- 1) MARK CLICK LOCATION -----
-  const marker = L.marker([lat, lng]);
-  markerGroup.addLayer(marker);
-  existingMarkers.push(marker);
-
-  marker.bindTooltip(
-    `Your location<br>Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`,
-    { sticky: true, direction: "top", opacity: 0.9 }
-  ).openTooltip();
 
   // ==================================================
   // 2) NEAREST AQHI STATION
