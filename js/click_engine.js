@@ -2,56 +2,40 @@ function buildPopupWeatherTable(data) {
   const now = new Date();
   let i = 0;
 
-  while (i < weatherData.hourly.time.length) {
-    if (new Date(weatherData.hourly.time[i]) >= now) break;
+  while (i < data.hourly.time.length) {
+    if (new Date(data.hourly.time[i]) >= now) break;
     i++;
   }
 
   let rows = "";
   for (let j = 0; j < 6; j++) {
-    const t = new Date(weatherData.hourly.time[i + j]);
+    const t = new Date(data.hourly.time[i + j]);
     rows += `
       <tr>
         <td>${t.toLocaleTimeString("en-CA",{hour:"2-digit",minute:"2-digit"})}</td>
-        <td>${Math.round(weatherData.hourly.temperature_2m[i+j])}°C</td>
-        <td>${Math.round(weatherData.hourly.wind_speed_10m[i+j])} km/h 
-            ${degToCardinal(weatherData.hourly.wind_direction_10m[i+j])}</td>
-        <td>${weatherData.hourly.precipitation[i+j].toFixed(1)} mm</td>
-        <td>${Math.round(weatherData.hourly.uv_index[i+j])}</td>
+        <td>${Math.round(data.hourly.temperature_2m[i+j])}°C</td>
+        <td>${Math.round(data.hourly.wind_speed_10m[i+j])} km/h 
+            ${degToCardinal(data.hourly.wind_direction_10m[i+j])}</td>
+        <td>${data.hourly.precipitation[i+j].toFixed(1)} mm</td>
+        <td>${Math.round(data.hourly.uv_index[i+j])}</td>
       </tr>
     `;
   }
-
 
   return `
     <div style="margin-top:10px;">
       <div style="font-weight:600; margin-bottom:6px;">
         Weather (next 6 hours)
       </div>
-  
-      <table style="
-        width:100%;
-        font-size:11px;
-        border-collapse:collapse;
-        table-layout:fixed;
-      ">
-        <thead>
-          <tr style="border-bottom:1px solid #ddd;">
-            <th style="text-align:center; padding:4px 6px; width:22%;">Time</th>
-            <th style="text-align:center; padding:4px 6px; width:18%;">Temp</th>
-            <th style="text-align:center; padding:4px 6px; width:30%;">Wind</th>
-            <th style="text-align:center; padding:4px 6px; width:15%;">Precip</th>
-            <th style="text-align:center; padding:4px 6px; width:15%;">UV</th>
-          </tr>
-        </thead>
+      <table style="width:100%; font-size:11px; border-collapse:collapse;">
         <tbody>
-          ${rows.replace(/<td>/g, '<td style="padding:4px 6px;">')}
+          ${rows}
         </tbody>
       </table>
     </div>
   `;
-
 }
+
 
 
 
@@ -62,33 +46,13 @@ async function renderClickData(lat, lng, map) {
   let weatherHtml = "";
 
   
-  function getPurpleAirList() {
-
-    let weatherData = null;
-
-  
-    // Primary: raw sensor objects (authoritative)
-    if (Array.isArray(window.purpleAirSensors) && window.purpleAirSensors.length) {
-      return window.purpleAirSensors;
-    }
-  
-    // Fallback: markers on map
-    if (window.purpleAirLayer && window.purpleAirLayer.getLayers) {
-      return window.purpleAirLayer.getLayers()
-        .map(l => {
-          const ll = l.getLatLng?.();
-          return ll ? {
-            name: "PurpleAir",
-            Latitude: ll.lat,
-            Longitude: ll.lng,
-            PM2_5: null
-          } : null;
-        })
-        .filter(Boolean);
-    }
-  
-    return [];
+function getPurpleAirList() {
+  if (Array.isArray(window.AppData?.purpleair)) {
+    return window.AppData.purpleair;
   }
+  return [];
+}
+
 
 
 
@@ -140,10 +104,8 @@ async function renderClickData(lat, lng, map) {
     weatherData = await r.json();
     weatherHtml = buildPopupWeatherTable(weatherData);
   
-    // 1️⃣ Extract current conditions
-    if (window.extractCurrentWeather) {
-      currentWeather = window.extractCurrentWeather(data);
-    }
+    currentWeather = window.extractCurrentWeather(weatherData);
+
   
     // 2️⃣ Update AQHI panel weather
     if (window.renderPanelWeather) {
@@ -155,8 +117,6 @@ async function renderClickData(lat, lng, map) {
       );
     }
   
-    // 3️⃣ Popup forecast (UNCHANGED)
-    weatherHtml = buildPopupWeatherTable(weatherData);
 
   
   } catch (e) {
