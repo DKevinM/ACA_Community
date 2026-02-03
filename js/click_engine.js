@@ -58,13 +58,14 @@ function buildPopupWeatherTable(data) {
 
 
 async function renderClickData(lat, lng, map) {
-
+  let weatherData = null;
+  let weatherHtml = "";
 
   
   function getPurpleAirList() {
 
     let weatherData = null;
-    let weatherHtml = "";
+
   
     // Primary: raw sensor objects (authoritative)
     if (Array.isArray(window.purpleAirSensors) && window.purpleAirSensors.length) {
@@ -137,6 +138,7 @@ async function renderClickData(lat, lng, map) {
     );
   
     weatherData = await r.json();
+    weatherHtml = buildPopupWeatherTable(weatherData);
   
     // 1️⃣ Extract current conditions
     if (window.extractCurrentWeather) {
