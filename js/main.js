@@ -57,7 +57,7 @@ map.on("click", async function (e) {
 
   // run your whole pipeline
   await renderClickData(lat, lng, map);
-  await window.updateCommunityAQHIFromClick(lat, lng);
+  window.updateCommunityAQHIFromClick(lat, lng); 
 });
 
   if (window.refreshcommunityPanel) {
