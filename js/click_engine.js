@@ -169,12 +169,6 @@ try {
   console.warn("Weather fetch failed", e);
 }
 
-if (window.updateMiniWeather) {
-  window.updateMiniWeather(weatherData);
-}
-
-
-
   
 
 
