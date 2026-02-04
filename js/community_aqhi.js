@@ -349,6 +349,17 @@ window.refreshcommunityPanel = async function () {
 
 window.updateCommunityAQHIFromClick = async function(lat, lng) {
   await loadcommunityFromAB(lat, lng);
+
+  // Save existing weather block BEFORE panel redraw
+  const existingWeather = document.getElementById("panel-weather")?.innerHTML;
+
   drawcommunityPanel();
+
+  // Put the weather BACK after redraw
+  if (existingWeather) {
+    const el = document.getElementById("panel-weather");
+    if (el) el.innerHTML = existingWeather;
+  }
 };
+
 
