@@ -122,10 +122,6 @@ function getPurpleAirList() {
     console.warn("Reverse geocoding failed", e);
   }
   
-  // Push address into AQHI panel (same panel as weather)
-  if (typeof window.updatePanelLocation === "function") {
-    window.updatePanelLocation(addressText, lat, lng);
-  }
   
   
 // ---- 3) WEATHER (panel + popup use same fetch) ----
@@ -256,6 +252,10 @@ try {
     </div>
   `;
 
+  // Push address into AQHI panel (same panel as weather)
+  if (typeof window.updatePanelLocation === "function") {
+    window.updatePanelLocation(addressText, lat, lng);
+  }
 
 
   marker.bindPopup(popupHtml, {
